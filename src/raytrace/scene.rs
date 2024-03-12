@@ -55,7 +55,7 @@ impl Scene {
     for _ in 0..MAX_BOUNCE_COUNT {
       let intersection = self.collide_ray(ray);
       if let Some((point, object)) = intersection {
-        ray.reflect(point, &object);
+        ray.reflect(point, object);
 
         let material = object.material();
         let emitted_light = material.emission_color * material.emission_strength;
