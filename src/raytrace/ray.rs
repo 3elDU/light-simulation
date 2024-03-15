@@ -19,7 +19,7 @@ impl Ray {
       thread_rng().sample::<f32, _>(rand_distr::StandardNormal),
       thread_rng().sample::<f32, _>(rand_distr::StandardNormal)
     ).normalize();
-    if normal.dot(&reflection) < 0.0 {
+    if reflection.dot(&normal) < 0.0 {
       reflection = -reflection;
     }
 

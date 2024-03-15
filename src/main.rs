@@ -22,7 +22,7 @@ async fn main() {
   let mut scene = Scene::new(
     SCREEN_WIDTH, SCREEN_HEIGHT,
     Camera::new(
-      Vector3::new(4.,3.5, 4.),
+      Vector3::new(0., 10., 10.),
       Vector3::new(0., 1., 0.)
     )
   );
@@ -32,45 +32,38 @@ async fn main() {
     Vector3::new(1., 1., 1.)
   )));
 
-  scene.objects.push(Box::new(Sphere::new(
+  scene.objects.push(Box::new(Sphere::new_emissive(
+    Vector3::new(-5., 1., 0.), 1.,
+    4.,
+    Vector3::new(1., 0., 0.),
+  )));
+  scene.objects.push(Box::new(Sphere::new_emissive(
+    Vector3::new(5., 1., 0.), 1.,
+    4.,
+    Vector3::new(0., 1., 0.),
+  )));
+  scene.objects.push(Box::new(Sphere::new_emissive(
     Vector3::new(0., 1., 0.), 1.,
-    Vector3::new(1., 0.2, 0.2),
-  )));
-  scene.objects.push(Box::new(Sphere::new(
-    Vector3::new(-2.3, 1., 0.), 1.,
-    Vector3::new(0.2, 1., 1.),
-  )));
-  scene.objects.push(Box::new(Sphere::new(
-    Vector3::new(2.3, 1., 0.), 1.,
-    Vector3::new(0.2, 0.2, 1.),
-  )));
-
-  scene.objects.push(Box::new(Sphere::new_emissive(
-    Vector3::new(0., 1., 4.), 1.,
-    2.,
-    Vector3::new(1., 1., 1.),
-  )));
-  scene.objects.push(Box::new(Sphere::new_emissive(
-    Vector3::new(0., 5., 0.), 1.,
-    1.,
-    Vector3::new(1., 1., 1.),
+    4.,
+    Vector3::new(0., 0., 1.)
   )));
   
   let now = Instant::now();
-  scene.render();
+  scene.sample();
   let elapsed = now.elapsed();
   println!("Render took {}ms", elapsed.as_millis());
 
-  let texture = Texture2D::from_image(&scene.image);
+  let mut texture = scene.image.generate_texture(scene.samples);
   
   loop {
     clear_background(BLACK);
 
     if is_mouse_button_pressed(MouseButton::Left) {
       let (x, y) = mouse_position();
-      let ray = scene.project_pixel(x as usize, y as usize);
+      let mut ray = scene.project_pixel(x as usize, y as usize);
 
       let mut intersections: Vec<(Vector3<f32>, f32)> = Vec::new();
+      let mut bounces = 0;
 
       for object in &scene.objects {
         let intersection = object.intersect(&ray);
@@ -82,22 +75,50 @@ async fn main() {
         }
       }
 
+      // Count the number of bounces
+      let mut last_intersection = scene.collide_ray(&ray);
+      loop {
+        if let Some((point, object)) = last_intersection {
+          bounces += 1;
+          ray.reflect(point, object);
+          last_intersection = scene.collide_ray(&ray);
+        } else {
+          break;
+        }
+      }
+
       for (i, (intersection, distance)) in intersections.iter().enumerate() {
         println!("Intersection {}; Points: [{:.2} \t {:.2} \t {:.2}]", i, 
           intersection.x, intersection.y, intersection.z
         );
         println!("Intersection {}; Distance - {}", i, distance);
       }
+      println!("Ray bounced off {} times", bounces);
       print!("\n");
     }
 
-    draw_texture_ex(&texture, 0.0, 0.0, WHITE, DrawTextureParams {
+    draw_texture_ex(texture, 0.0, 0.0, WHITE, DrawTextureParams {
       dest_size: Some(Vec2::new(
         SCREEN_WIDTH as f32 * PIXEL_SIZE as f32,
         SCREEN_HEIGHT as f32 * PIXEL_SIZE as f32
       )),
       ..Default::default()
     });
+
+    egui_macroquad::ui(|egui_ctx| {
+      egui::Window::new("Rendering")
+        .show(egui_ctx, |ui| {
+          if ui.button("Render").clicked() {
+            scene.sample();
+            texture = scene.image.generate_texture(scene.samples);
+          }
+          ui.label(format!("Samples: {}", scene.samples));
+        });
+    });
+    egui_macroquad::draw();
+
+    // scene.render();
+    // texture = Texture2D::from_image(&scene.image);
 
     next_frame().await
   }
