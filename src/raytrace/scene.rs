@@ -38,7 +38,9 @@ impl Scene {
 
       if let Some(intersection) = intersection {
         let dist = (intersection - ray.origin).magnitude();
-        if dist < min_dist {
+        // Do not count the intersection, if the distance to an object is smaller than 1/1000th
+        // This fixes the "shadow acne" problem
+        if dist > 0.001 && dist < min_dist {
           min_dist = dist;
           intersected_object = Some(object);
           point = Some(intersection);
