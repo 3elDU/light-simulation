@@ -28,10 +28,10 @@ impl Scene {
     }
   }
 
-  pub fn collide_ray(&self, ray: &Ray) -> Option<(Vector3<f32>, &Box<dyn Shape>)> {
-    let mut min_dist = f32::INFINITY;
+  pub fn collide_ray(&self, ray: &Ray) -> Option<(Vector3<f64>, &Box<dyn Shape>)> {
+    let mut min_dist = f64::INFINITY;
     let mut intersected_object: Option<&Box<dyn Shape>> = None;
-    let mut point: Option<Vector3<f32>> = None;
+    let mut point: Option<Vector3<f64>> = None;
 
     for object in &self.objects {
       let intersection = object.intersect(&ray);
@@ -49,11 +49,11 @@ impl Scene {
     Some((point?, intersected_object?))
   }
 
-  pub fn trace_ray(&self, ray: &mut Ray) -> Vector3<f32> {
+  pub fn trace_ray(&self, ray: &mut Ray) -> Vector3<f64> {
     let mut ray_color = Vector3::new(1.0, 1.0, 1.0);
     let mut incoming_light = Vector3::new(0.0, 0.0, 0.0);
 
-    for bounce in 0..MAX_BOUNCE_COUNT {
+    for _ in 0..MAX_BOUNCE_COUNT {
       let intersection = self.collide_ray(ray);
       if let Some((point, object)) = intersection {
         ray.reflect(point, object);
@@ -63,14 +63,7 @@ impl Scene {
 
         incoming_light += emitted_light.component_mul(&ray_color);
         ray_color.component_mul_assign(&material.color);
-
-        // Stop, if ray hits a light source
-        if object.material().emission_strength > 0. {
-          break;
-        }
       } else {
-        // let emission_color = Vector3::new(1., 1., 1.).lerp(&Vector3::new(0.5, 0.7, 1.0), ray.direction.y) / bounce as f32 * 0.5;
-        // incoming_light += emission_color.component_mul(&ray_color);
         break;
       }
     }
@@ -83,8 +76,8 @@ impl Scene {
     self.camera.generate_ray(
       // Convert our pixel coordinates, which go from 0 to N
       // to screen coordinates, which go from -1 to +1
-      1.0 - (x as f32 / SCREEN_WIDTH as f32) * 2.0,
-      1.0 - (y as f32 / SCREEN_HEIGHT as f32) * 2.0
+      1.0 - (x as f64 / SCREEN_WIDTH as f64) * 2.0,
+      1.0 - (y as f64 / SCREEN_HEIGHT as f64) * 2.0
     )
   }
 
@@ -102,6 +95,11 @@ impl Scene {
     }
 
     self.samples += SAMPLES_PER_PIXEL;
+  }
+
+  // Add object to the scene
+  pub fn add(&mut self, object: Box<dyn Shape>) {
+    self.objects.push(object);
   }
 
   pub fn width(&self) -> usize {

@@ -1,13 +1,14 @@
 #[cfg(test)]
 mod tests {
-  use nalgebra::Vector3;
+  use nalgebra::{Vector2, Vector3};
 
-use crate::raytrace::{camera::Camera, shape::{Shape, Sphere}};
+use crate::raytrace::{camera::Camera, shape::{Shape, Sphere}, transform::TransformBuilder};
 
   #[test]
   // Create different camera setups, and ensure that all vector values are coorect
   fn camera_perspective() {
     let camera = Camera::new(
+      Vector2::new(1280, 720),
       Vector3::new(0., 0., 0.),
       Vector3::new(10., 0., 0.)
     );
@@ -27,12 +28,17 @@ use crate::raytrace::{camera::Camera, shape::{Shape, Sphere}};
   // - reflections must not point inside the sphere
   fn ray_physics() {
     let camera = Camera::new(
+      Vector2::new(1280, 720),
       Vector3::new(0., 0., 0.),
       Vector3::new(10., 0., 0.)
     );
     let sphere: Box<dyn Shape> = Box::new(Sphere::new(
-      Vector3::new(10., 0., 0.), 1.,
-      Vector3::new(1., 1., 1.)
+      Vector3::new(1., 1., 1.),
+      TransformBuilder::new()
+        .translate_x(10.)
+        .scale_z(10000.0)
+        .scale_y(10000.0)
+        .build()
     ));
 
     // Cast a ray from the center of the screen.

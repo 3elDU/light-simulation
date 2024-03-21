@@ -4,7 +4,7 @@ use nalgebra::Vector3;
 pub struct Image {
   width: usize,
   height: usize,
-  accumulated_exposure: Vec<Vector3<f32>>,
+  accumulated_exposure: Vec<Vector3<f64>>,
 }
 
 impl Image {
@@ -22,13 +22,13 @@ impl Image {
     }
   }
 
-  pub fn set_pixel(&mut self, x: usize, y: usize, color: Vector3<f32>) {
+  pub fn set_pixel(&mut self, x: usize, y: usize, color: Vector3<f64>) {
     self.accumulated_exposure[y * self.width + x] = color;
   }
-  pub fn inc_pixel(&mut self, x: usize, y: usize, color: Vector3<f32>) {
+  pub fn inc_pixel(&mut self, x: usize, y: usize, color: Vector3<f64>) {
     self.accumulated_exposure[y * self.width + x] += color
   }
-  pub fn get_pixel(&self, x: usize, y: usize) -> Vector3<f32> {
+  pub fn get_pixel(&self, x: usize, y: usize) -> Vector3<f64> {
     self.accumulated_exposure[y * self.width + x]
   }
 
@@ -47,9 +47,9 @@ impl Image {
         let color = self.get_pixel(x, y);
 
         let averaged_color = Color::new(
-          color.x / samples_rendered as f32,
-          color.y / samples_rendered as f32,
-          color.z / samples_rendered as f32,
+          color.x as f32 / samples_rendered as f32,
+          color.y as f32 / samples_rendered as f32,
+          color.z as f32 / samples_rendered as f32,
           1.0
         );
 
