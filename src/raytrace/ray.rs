@@ -11,7 +11,7 @@ pub struct Ray {
 
 impl Ray {
   // Reflect from an object, given an intersection point and the object instance
-  pub fn reflect(&mut self, point: Vector3<f64>, object: &Box<dyn Shape>) {
+  pub fn reflect(&mut self, point: Vector3<f64>, object: &dyn Shape) {
     self.origin = point;
     let normal = object.normal(point);
 

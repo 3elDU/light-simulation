@@ -46,12 +46,17 @@ impl Image {
       for y in 0..self.height {
         let color = self.get_pixel(x, y);
 
-        let averaged_color = Color::new(
+        let mut averaged_color = Color::new(
           color.x as f32 / samples_rendered as f32,
           color.y as f32 / samples_rendered as f32,
           color.z as f32 / samples_rendered as f32,
           1.0
         );
+
+        // Apply gamma correction
+        averaged_color.r = averaged_color.r.powf(1.0 / 2.2);
+        averaged_color.g = averaged_color.g.powf(1.0 / 2.2);
+        averaged_color.b = averaged_color.b.powf(1.0 / 2.2);
 
         image.set_pixel(x as u32, y as u32, averaged_color);
       }

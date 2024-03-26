@@ -114,14 +114,10 @@ async fn main() {
 
             // Count the number of bounces
             let mut last_intersection = scene.collide_ray(&ray);
-            loop {
-                if let Some((point, object)) = last_intersection {
-                    bounces += 1;
-                    ray.reflect(point, object);
-                    last_intersection = scene.collide_ray(&ray);
-                } else {
-                    break;
-                }
+            while let Some((point, object)) = last_intersection {
+                bounces += 1;
+                ray.reflect(point, object);
+                last_intersection = scene.collide_ray(&ray);
             }
 
             for (i, (intersection, distance)) in intersections.iter().enumerate() {
@@ -132,7 +128,7 @@ async fn main() {
                 println!("Intersection {}; Distance - {}", i, distance);
             }
             println!("Ray bounced off {} times", bounces);
-            print!("\n");
+            println!();
         }
 
         draw_texture_ex(
@@ -159,9 +155,6 @@ async fn main() {
             });
         });
         egui_macroquad::draw();
-
-        // scene.render();
-        // texture = Texture2D::from_image(&scene.image);
 
         next_frame().await
     }

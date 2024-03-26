@@ -28,13 +28,13 @@ impl Scene {
     }
   }
 
-  pub fn collide_ray(&self, ray: &Ray) -> Option<(Vector3<f64>, &Box<dyn Shape>)> {
+  pub fn collide_ray(&self, ray: &Ray) -> Option<(Vector3<f64>, &dyn Shape)> {
     let mut min_dist = f64::INFINITY;
-    let mut intersected_object: Option<&Box<dyn Shape>> = None;
+    let mut intersected_object: Option<&dyn Shape> = None;
     let mut point: Option<Vector3<f64>> = None;
 
     for object in &self.objects {
-      let intersection = object.intersect(&ray);
+      let intersection = object.intersect(ray);
 
       if let Some(intersection) = intersection {
         let dist = (intersection - ray.origin).magnitude();
@@ -42,7 +42,7 @@ impl Scene {
         // This fixes the "shadow acne" problem
         if dist > 0.001 && dist < min_dist {
           min_dist = dist;
-          intersected_object = Some(object);
+          intersected_object = Some(&**object);
           point = Some(intersection);
         }
       }
