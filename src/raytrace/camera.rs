@@ -3,7 +3,7 @@ use rand::prelude::*;
 
 use super::ray::Ray;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Camera {
     // Resolution of the camera in pixels
     resolution: Vector2<usize>,

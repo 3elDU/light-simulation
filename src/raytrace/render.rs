@@ -44,10 +44,8 @@ impl Render {
         self.samples += 1;
     }
 
-    /// Get a single pixel from the render, with gamma correction applied
-    /// Get the value of a pixel at the specified coordinates, with exposure
-    /// adjusted and gamma corrected
-    ///
+    /// Get value of pixel at specified coordinates, with adjusted exporuse
+    /// and corrected gamma
     pub fn get_pixel_corrected(&self, x: usize, y: usize) -> Vector3<f64> {
         let color = self.get_pixel(x, y);
 
