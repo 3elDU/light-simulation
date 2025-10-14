@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/index.css" />
+    <title>DEMO</title>
+  </head>
+  <body>
+    <label for="width">Image width</label>
+    <input type="number" name="width" id="width" step="1" min="16" />
+    <label for="height">Image height</label>
+    <input type="number" name="height" id="height" step="1" min="9" />
+
+    <label for="max-bounce-count">Max bounce count</label>
+    <input
+      type="number"
+      name="max-bounce-count"
+      id="max-bounce-count"
+      step="1"
+      min="1024"
+    />
+    <label for="samples-per-pixel">Samples per pixel</label>
+    <input
+      type="number"
+      name="samples-per-pixel"
+      id="samples-per-pixel"
+      step="1"
+      min="9"
+    />
+
+    <button id="render-btn">Render</button>
+    <canvas id="output"></canvas>
+
+    <p id="progress" style="visibility: hidden"></p>
+
+    <script type="module">
+      const widthInput = document.getElementById("width");
+      const heightInput = document.getElementById("height");
+      const maxBounceCountInput = document.getElementById("max-bounce-count");
+      const samplesPerPixelInput = document.getElementById("samples-per-pixel");
+      const renderBtn = document.getElementById("render-btn");
+      const progressEl = document.getElementById("progress");
+      /** @type {HTMLCanvasElement} */
+      const outputCanvas = document.getElementById("output");
+      const canvasCtx = outputCanvas.getContext("2d");
+
+      const worker = new Worker(new URL("./src/worker.ts", import.meta.url), {
+        type: "module",
+      });
+
+      /** @param {MessageEvent} event */
+      worker.addEventListener("message", (event) => {
+        /** @type {ImageData} */
+        const image = event.data;
+
+        outputCanvas.width = image.width;
+        outputCanvas.height = image.height;
+        canvasCtx.putImageData(image, 0, 0);
+
+        progressEl.textContent = "Done!";
+        progressEl.style.color = "green";
+      });
+
+      renderBtn.addEventListener("click", () => {
+        worker.postMessage({
+          width: Number.parseInt(widthInput.value),
+          height: Number.parseInt(heightInput.value),
+          maxBounceCount: Number.parseInt(maxBounceCountInput.value),
+          samplesPerPixel: Number.parseInt(samplesPerPixelInput.value),
+        });
+
+        progressEl.textContent = "Rendering...";
+        progressEl.style.visibility = "visibility";
+        progressEl.style.color = "black";
+      });
+    </script>
+  </body>
+</html>

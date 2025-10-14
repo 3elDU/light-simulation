@@ -1,6 +1,6 @@
-pub mod raytrace;
-pub mod config;
-pub mod util;
+mod raytrace;
 
-#[cfg(test)]
-pub mod tests;
+/// Functions exported to wasm for interacting with the [raytrace] library
+pub mod wasm;
+
+pub use wasm::*;

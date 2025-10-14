@@ -1,0 +1,13 @@
+label,
+input,
+button {
+  display: block;
+}
+
+canvas {
+  border: 1px solid black;
+}
+
+button {
+  margin: 16px 0 16px 0;
+}
