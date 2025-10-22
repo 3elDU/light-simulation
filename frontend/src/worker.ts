@@ -1,7 +1,4 @@
-import instantiate, { Config, render } from "../assets/light_simulation";
-
-await instantiate();
-console.log("worker: wasm instantiated!");
+import { Config, render } from "./wasm/light_simulation";
 
 addEventListener("message", async (event) => {
   const config = new Config(

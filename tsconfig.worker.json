@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022", "WebWorker"],
+    "composite": true,
+    "isolatedModules": true
+  },
+  "include": ["./frontend/src/worker.ts"]
+}

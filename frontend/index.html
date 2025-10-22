@@ -3,77 +3,149 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="stylesheet" href="/css/index.css" />
-    <title>DEMO</title>
+
+    <link rel="icon" href="/assets/favicon.png" sizes="any" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+
+    <title>Light Simulation</title>
+
+    <script src="src/index.ts" type="module" async></script>
   </head>
   <body>
-    <label for="width">Image width</label>
-    <input type="number" name="width" id="width" step="1" min="16" />
-    <label for="height">Image height</label>
-    <input type="number" name="height" id="height" step="1" min="9" />
+    <div id="hide-controls-container">
+      <button id="hide-controls-btn" class="input c-container">
+        <svg
+          aria-hidden="true"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M792-56 624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM480-320q11 0 20.5-1t20.5-4L305-541q-3 11-4 20.5t-1 20.5q0 75 52.5 127.5T480-320Zm292 18L645-428q7-17 11-34.5t4-37.5q0-75-52.5-127.5T480-680q-20 0-37.5 4T408-664L306-766q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302ZM587-486 467-606q28-5 51.5 4.5T559-574q17 18 24.5 41.5T587-486Z"
+          />
+        </svg>
+        Hide controls
+      </button>
+    </div>
 
-    <label for="max-bounce-count">Max bounce count</label>
-    <input
-      type="number"
-      name="max-bounce-count"
-      id="max-bounce-count"
-      step="1"
-      min="1024"
-    />
-    <label for="samples-per-pixel">Samples per pixel</label>
-    <input
-      type="number"
-      name="samples-per-pixel"
-      id="samples-per-pixel"
-      step="1"
-      min="1"
-    />
+    <aside id="controls" class="surface">
+      <div class="input-row">
+        <div class="labelled-input">
+          <label for="width" class="label">Width</label>
+          <input id="width" type="number" class="input c-container" />
+        </div>
 
-    <button id="render-btn">Render</button>
-    <canvas id="output"></canvas>
+        <div class="cross" aria-hidden="true">
+          <svg
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M335.28-279 279-335l144.72-145L279-624l56.28-56L480-535.39 623.72-680 680-624 535.28-480 680-335l-56.28 56L480-423.61 335.28-279Z"
+            />
+          </svg>
+        </div>
 
-    <p id="progress" style="visibility: hidden"></p>
+        <div class="labelled-input">
+          <label for="height" class="label">Height</label>
+          <input id="height" type="number" class="input c-container" />
+        </div>
+      </div>
 
-    <script type="module">
-      const widthInput = document.getElementById("width");
-      const heightInput = document.getElementById("height");
-      const maxBounceCountInput = document.getElementById("max-bounce-count");
-      const samplesPerPixelInput = document.getElementById("samples-per-pixel");
-      const renderBtn = document.getElementById("render-btn");
-      const progressEl = document.getElementById("progress");
-      /** @type {HTMLCanvasElement} */
-      const outputCanvas = document.getElementById("output");
-      const canvasCtx = outputCanvas.getContext("2d");
+      <div class="input-row">
+        <div class="labelled-input">
+          <label for="max-bounce-count" class="label">Max bounce count</label>
+          <input
+            type="number"
+            id="max-bounce-count"
+            class="input c-container"
+          />
+        </div>
+      </div>
 
-      const worker = new Worker(new URL("./src/worker.ts", import.meta.url), {
-        type: "module",
-      });
+      <div class="input-row">
+        <div class="labelled-input">
+          <label for="samples-per-pixel" class="label">Samples per pixel</label>
+          <input
+            type="number"
+            id="samples-per-pixel"
+            class="input c-container"
+          />
+        </div>
+      </div>
 
-      /** @param {MessageEvent} event */
-      worker.addEventListener("message", (event) => {
-        /** @type {ImageData} */
-        const image = event.data;
+      <div class="input-row">
+        <button id="render-btn" class="input c-primary">
+          <svg
+            aria-hidden="true"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M320-200v-560l440 280-440 280Z" />
+          </svg>
+          Render
+        </button>
+        <button id="skip-btn" class="input c-secondary">
+          <svg
+            aria-hidden="true"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Z" />
+          </svg>
+          Skip
+        </button>
+      </div>
+    </aside>
+    <div id="main-container" class="vstack" data-state="empty">
+      <div
+        id="render-progress"
+        class="progress"
+        role="progressbar"
+        aria-label="Rendering progress"
+        aria-valuenow="0"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div class="progressbar" style="width: 80%"></div>
+      </div>
+      <main id="result" class="surface">
+        <p class="no-image">Click "Render" to see an image here</p>
+        <p id="error-text" class="error" title="Error description"></p>
+        <div class="action-area">
+          <section class="info">
+            <h2 id="sample-count-text" class="text-large"></h2>
+            <p id="resolution-text"></p>
+          </section>
+          <button id="download-btn" class="input c-primary">
+            <svg
+              aria-hidden="true"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"
+              />
+            </svg>
+            Download image
+          </button>
+        </div>
 
-        outputCanvas.width = image.width;
-        outputCanvas.height = image.height;
-        canvasCtx.putImageData(image, 0, 0);
-
-        progressEl.textContent = "Done!";
-        progressEl.style.color = "green";
-      });
-
-      renderBtn.addEventListener("click", () => {
-        worker.postMessage({
-          width: Number.parseInt(widthInput.value),
-          height: Number.parseInt(heightInput.value),
-          maxBounceCount: Number.parseInt(maxBounceCountInput.value),
-          samplesPerPixel: Number.parseInt(samplesPerPixelInput.value),
-        });
-
-        progressEl.textContent = "Rendering...";
-        progressEl.style.visibility = "visible";
-        progressEl.style.color = "black";
-      });
-    </script>
+        <div id="canvas-container">
+          <canvas id="output" width="0" height="0"></canvas>
+        </div>
+      </main>
+    </div>
   </body>
 </html>

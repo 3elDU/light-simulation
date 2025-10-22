@@ -4,4 +4,4 @@
 node_modules
 
 # compiled wasm files
-frontend/assets/light_simulation*
+frontend/src/wasm/*

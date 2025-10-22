@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["DOM", "ES2022"],
+    "types": ["vite/client"],
+    "composite": true,
+    "isolatedModules": true
+  },
+  "include": ["./frontend/src/**/*.ts"],
+  "exclude": ["./frontend/src/worker.ts"]
+}
