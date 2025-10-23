@@ -1,9 +1,9 @@
 import RenderController from "./render";
 import UIController from "./ui/controller";
-import WasmWorker from "./worker?worker";
 
 // Initialize WebAssembly worker
-const worker = new WasmWorker();
+const worker = new Worker(new URL("./worker.ts", import.meta.url));
+
 const render = new RenderController(worker);
 
 const controller = new UIController(render);

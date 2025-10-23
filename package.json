@@ -2,7 +2,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite dev"
+    "dev": "vite dev",
+    "build": "./gen-wasm-glue.sh && vite build"
   },
   "devDependencies": {
     "vite": "^7.1.10",

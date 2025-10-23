@@ -16,4 +16,6 @@ rand_distr = "0.5.1"
 wasm-bindgen = "0.2.100"
 
 [profile.release]
-strip = "debuginfo"
+opt-level = 3
+strip = "symbols"
+lto = true

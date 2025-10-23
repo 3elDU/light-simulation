@@ -5,3 +5,6 @@ node_modules
 
 # compiled wasm files
 frontend/src/wasm/*
+
+# compiled frontend
+dist
