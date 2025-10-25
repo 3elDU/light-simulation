@@ -35,7 +35,7 @@
       <div class="input-row">
         <div class="labelled-input">
           <label for="width" class="label">Width</label>
-          <input id="width" type="number" class="input c-container" />
+          <input id="width" type="number" class="input c-container" min="1" />
         </div>
 
         <div class="cross" aria-hidden="true">
@@ -53,7 +53,7 @@
 
         <div class="labelled-input">
           <label for="height" class="label">Height</label>
-          <input id="height" type="number" class="input c-container" />
+          <input id="height" type="number" class="input c-container" min="1" />
         </div>
       </div>
 
@@ -64,6 +64,7 @@
             type="number"
             id="max-bounce-count"
             class="input c-container"
+            min="1"
           />
         </div>
       </div>
@@ -75,6 +76,7 @@
             type="number"
             id="samples-per-pixel"
             class="input c-container"
+            min="1"
           />
         </div>
       </div>
@@ -120,11 +122,13 @@
       </div>
       <main id="result" class="surface">
         <p class="no-image">Click "Render" to see an image here</p>
-        <p id="error-text" class="error" title="Error description"></p>
+        <div class="error-container">
+          <p id="error-text" class="error" title="Error description"></p>
+        </div>
         <div class="action-area">
           <section class="info">
-            <h2 id="sample-count-text" class="text-large"></h2>
-            <p id="resolution-text"></p>
+            <h2 id="info-title-text" class="text-large"></h2>
+            <p id="info-supporting-text"></p>
           </section>
           <button id="download-btn" class="input c-primary">
             <svg

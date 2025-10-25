@@ -83,13 +83,8 @@ impl Scene {
     pub fn sample(&mut self) {
         for x in 0..self.render.config.width {
             for y in 0..self.render.config.height {
-                let mut accumulated_color = Vector3::zeros();
-                for _ in 0..self.render.config.samples_per_pixel {
-                    let mut ray = self.project_pixel(x, y);
-                    accumulated_color += self.trace_ray(&mut ray);
-                }
-
-                self.render.add_exposure(x, y, accumulated_color);
+                let mut ray = self.project_pixel(x, y);
+                self.render.add_exposure(x, y, self.trace_ray(&mut ray));
             }
         }
 

@@ -5,68 +5,60 @@ export interface RenderSettings {
   samplesPerPixel: number;
 }
 
+interface RenderResponse {
+  image: ImageData;
+  sample: number;
+}
+
 /** Abstracts communication with the worker that runs WebAssembly code */
 export default class RenderController {
   #worker?: Worker;
-  #onMessage?: (data: unknown) => void;
-  #onError?: (error: string) => void;
 
   async load() {
     try {
       // Initialize WebAssembly worker
-      this.#worker = new Worker(new URL("./worker.ts", import.meta.url), {
+      this.#worker = new Worker(new URL("./worker/index.ts", import.meta.url), {
         name: "Wasm Worker",
         type: "module",
       });
 
-      this.#registerListeners();
+      let timeout = setTimeout(() => {
+        throw new Error("Timeout reached while waiting for worker to load");
+      }, 30_000);
 
       // Wait for the "loaded" event
-      return new Promise<true>((resolve, reject) => {
-        setTimeout(
-          () => reject("Timeout reached while waiting for worker to load"),
-          30_000
-        );
-
-        this.#onMessage = () => {
-          resolve(true);
-        };
-        this.#onError = reject;
-      });
+      await this.#waitForMessage();
+      clearTimeout(timeout);
     } catch (e) {
       throw e;
     }
   }
 
-  #registerListeners() {
-    this.#worker.addEventListener("message", this.#handleMessage.bind(this));
-    this.#worker.addEventListener("error", this.#handleError.bind(this));
-    this.#worker.addEventListener("messageerror", this.#handleError.bind(this));
+  #waitForMessage() {
+    return new Promise<any>((resolve, reject) => {
+      this.#worker.addEventListener(
+        "message",
+        (event) => {
+          resolve(event.data);
+        },
+        { once: true }
+      );
+      this.#worker.addEventListener(
+        "error",
+        () => {
+          reject("Error inside worker");
+        },
+        { once: true }
+      );
+    });
   }
 
-  #handleMessage(event: MessageEvent) {
-    this.#onMessage(event.data);
-    this.#clearHandlers();
-  }
-
-  #handleError(event: Event) {
-    if (this.#onError) {
-      this.#onError("Unknown error inside a Worker. Check the devtools.");
-      this.#clearHandlers();
-    }
-  }
-
-  #clearHandlers() {
-    this.#onMessage = undefined;
-    this.#onError = undefined;
-  }
-
-  render(opts: RenderSettings): Promise<ImageData> {
+  async *render(opts: RenderSettings): AsyncGenerator<RenderResponse> {
     this.#worker.postMessage(opts);
 
-    return new Promise((resolve, reject) => {
-      this.#onMessage = resolve;
-      this.#onError = reject;
-    });
+    for (let i = 0; i < opts.samplesPerPixel; i++) {
+      const message = (await this.#waitForMessage()) as RenderResponse;
+      yield message;
+    }
   }
 }

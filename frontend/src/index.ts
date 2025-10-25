@@ -1,7 +1,6 @@
-import RenderController from "./render";
 import UIController from "./ui/controller";
 
-const controller = new UIController(new RenderController());
+const controller = new UIController();
 controller
   .load()
   .then(() => {

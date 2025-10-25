@@ -6,5 +6,5 @@
     "composite": true,
     "isolatedModules": true
   },
-  "include": ["./frontend/src/worker.ts"]
+  "include": ["./frontend/src/worker/index.ts"]
 }

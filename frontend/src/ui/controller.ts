@@ -3,6 +3,7 @@ import elements from "./elements";
 import {
   getDefaultModel,
   RenderState,
+  RenderStats,
   UIModel,
   UINumberInputKey,
 } from "./model";
@@ -12,10 +13,10 @@ export default class UIController {
   #ctx: CanvasRenderingContext2D;
   #renderController: RenderController;
 
-  constructor(renderController: RenderController) {
+  constructor() {
     this.#model = getDefaultModel();
     this.#ctx = elements.outputCanvas.getContext("2d");
-    this.#renderController = renderController;
+    this.#renderController = new RenderController();
 
     this.registerEvents();
     this.update();
@@ -64,7 +65,6 @@ export default class UIController {
     const num = Number.parseInt(newValue);
 
     if (!Number.isNaN(num)) {
-      console.log("number changed", key, num);
       this.#model[key] = num;
     }
   }
@@ -73,16 +73,40 @@ export default class UIController {
     try {
       this.#setState({
         state: "rendering",
-        progress: 25,
+        progress: 0,
       });
 
-      const image = await this.#renderController.render(this.#model);
+      let image: ImageData;
+      const start = performance.now();
+
+      for await (const response of this.#renderController.render(this.#model)) {
+        this.#setState({
+          state: "rendering",
+          progress: (response.sample / this.#model.samplesPerPixel) * 100,
+          image: response.image,
+        });
+
+        image = response.image;
+      }
+
+      const totalRenderTime = (performance.now() - start) / 1000;
+      const samplesPerSecond = this.#model.samplesPerPixel / totalRenderTime;
+      const megapixelsPerSecond =
+        (samplesPerSecond * this.#model.width * this.#model.height) / 1_000_000;
+      const stats: RenderStats = {
+        // Round numbers to two digits after comma
+        totalRenderTime: Math.round(totalRenderTime * 100) / 100,
+        samplesPerSecond: Math.round(samplesPerSecond * 100) / 100,
+        megapixelsPerSecond: Math.round(megapixelsPerSecond * 100) / 100,
+      };
 
       this.#setState({
         state: "finished",
         image: image,
+        stats,
       });
     } catch (e) {
+      console.error(e);
       this.#setState({
         state: "error",
         error: e,
@@ -119,6 +143,13 @@ export default class UIController {
         (
           elements.progressBar.children[0] as HTMLElement
         ).style.width = `${state.progress}%`;
+
+        if (state.image) {
+          elements.outputCanvas.width = state.image.width;
+          elements.outputCanvas.height = state.image.height;
+          this.#ctx.putImageData(state.image, 0, 0);
+        }
+
         break;
       case "finished":
         elements.renderButton.disabled = false;
@@ -129,10 +160,8 @@ export default class UIController {
         elements.outputCanvas.height = state.image.height;
         this.#ctx.putImageData(state.image, 0, 0);
 
-        elements.sampleCountText.textContent = `${
-          this.#model.samplesPerPixel
-        } samples`;
-        elements.resolutionText.textContent = `${state.image.width} x ${state.image.height} image`;
+        elements.infoTitleText.textContent = `${state.stats.totalRenderTime}s render time`;
+        elements.infoSupportingText.textContent = `${state.image.width} x ${state.image.height} image, ${state.stats.samplesPerSecond} samples/sec, ${state.stats.megapixelsPerSecond} MP/sec`;
 
         break;
       case "error":

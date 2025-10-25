@@ -1,5 +1,5 @@
 #hide-controls-container {
-    position: fixed;
+    position: absolute;
     left: 32px;
     top: 32px;
 }
@@ -17,6 +17,14 @@
 
 #result .no-image {
     display: none;
+}
+
+#result .error-container {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #error-text {
@@ -38,10 +46,11 @@
 #main-container:not([data-state="has-image"]) .action-area {
     display: none;
 }
-#main-container:not([data-state="has-image"]) #canvas-container {
+#main-container:not([data-state="has-image"], [data-state="rendering"])
+    #canvas-container {
     display: none;
 }
-#main-container:not([data-state="error"]) #error-text {
+#main-container:not([data-state="error"]) .error-container {
     display: none;
 }
 #main-container[data-state="empty"] .no-image {

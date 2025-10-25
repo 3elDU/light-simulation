@@ -8,5 +8,5 @@
     "isolatedModules": true
   },
   "include": ["./frontend/src/**/*.ts"],
-  "exclude": ["./frontend/src/worker.ts"]
+  "exclude": ["./frontend/src/worker/index.ts"]
 }

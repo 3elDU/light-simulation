@@ -64,4 +64,6 @@ button.input:active {
     border-radius: 0.375rem;
 
     background: var(--c-primary);
+
+    transition: width 150ms linear;
 }

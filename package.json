@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "preview": "./gen-wasm-glue.sh && vite preview",
-    "build": "./gen-wasm-glue.sh && vite build"
+    "build": "./gen-wasm-glue.sh && vite build",
+    "preview": "npm run build && vite preview"
   },
   "devDependencies": {
     "vite": "^7.1.10",
