@@ -3,11 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
+    "preview": "./gen-wasm-glue.sh && vite preview",
     "build": "./gen-wasm-glue.sh && vite build"
   },
   "devDependencies": {
     "vite": "^7.1.10",
-    "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0"
   }
 }

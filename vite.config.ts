@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
 
 export default defineConfig({
   root: "./frontend",
@@ -10,9 +9,11 @@ export default defineConfig({
     emptyOutDir: true,
     assetsDir: "assets",
   },
+  plugins: [wasm()],
   worker: {
+    format: "es",
     plugins() {
-      return [wasm(), topLevelAwait()];
+      return [wasm()];
     },
   },
 });
