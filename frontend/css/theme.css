@@ -11,8 +11,13 @@
     --c-primary-active: hsl(26, 80%, 50%);
     --c-secondary-active: hsl(246, 80%, 55%);
 
+    --c-primary-disabled: hsl(26, 60%, 80%);
+    --c-secondary-disabled: hsl(244, 15%, 47%);
+
     --c-text-regular: black;
     --c-text-inverted: white;
+    --c-text-regular-disabled: rgb(64, 64, 64);
+    --c-text-inverted-disabled: rgb(200, 200, 200);
 
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
@@ -39,6 +44,11 @@ button.c-container:active {
 button.c-primary:active {
     background: var(--c-primary-active);
 }
+button.c-primary:disabled {
+    background: var(--c-primary-disabled);
+    color: var(--c-text-regular-disabled);
+    fill: var(--c-text-regular-disabled);
+}
 
 .c-secondary {
     background: var(--c-secondary);
@@ -47,6 +57,11 @@ button.c-primary:active {
 }
 button.c-secondary:active {
     background: var(--c-secondary-active);
+}
+button.c-secondary:disabled {
+    background: var(--c-secondary-disabled);
+    color: var(--c-text-inverted-disabled);
+    fill: var(--c-text-inverted-disabled);
 }
 
 .text-small {

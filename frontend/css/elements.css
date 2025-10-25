@@ -24,6 +24,14 @@
     font-size: 150%;
 }
 
+/**
+    Main container has 4 states:
+
+    - empty (initial): no image, progressbar hidden, action area hidden
+    - rendering: no image, progressbar shown, action area hidden,
+    - finished rendering: image shown, progressbar hidden, action area shown
+    - error: image hidden, progressbar hidden, action area hidden, error shown
+*/
 #main-container:not([data-state="rendering"]) .progress {
     display: none;
 }

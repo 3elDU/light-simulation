@@ -7,42 +7,66 @@ export interface RenderSettings {
 
 /** Abstracts communication with the worker that runs WebAssembly code */
 export default class RenderController {
-  #worker: Worker;
-  #resolve?: (image: ImageData) => void;
-  #reject?: (error: string) => void;
+  #worker?: Worker;
+  #onMessage?: (data: unknown) => void;
+  #onError?: (error: string) => void;
 
-  constructor(worker: Worker) {
-    this.#worker = worker;
+  async load() {
+    try {
+      // Initialize WebAssembly worker
+      this.#worker = new Worker(new URL("./worker.ts", import.meta.url), {
+        name: "Wasm Worker",
+        type: "module",
+      });
+
+      this.#registerListeners();
+
+      // Wait for the "loaded" event
+      return new Promise<true>((resolve, reject) => {
+        setTimeout(
+          () => reject("Timeout reached while waiting for worker to load"),
+          30_000
+        );
+
+        this.#onMessage = () => {
+          resolve(true);
+        };
+        this.#onError = reject;
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  #registerListeners() {
     this.#worker.addEventListener("message", this.#handleMessage.bind(this));
     this.#worker.addEventListener("error", this.#handleError.bind(this));
     this.#worker.addEventListener("messageerror", this.#handleError.bind(this));
   }
 
   #handleMessage(event: MessageEvent) {
-    if (this.#resolve && event.data instanceof ImageData) {
-      this.#resolve(event.data);
-      this.#clearHandlers();
-    }
+    this.#onMessage(event.data);
+    this.#clearHandlers();
   }
 
   #handleError(event: Event) {
-    if (this.#reject) {
-      this.#reject("Error inside a Worker");
+    if (this.#onError) {
+      this.#onError("Unknown error inside a Worker. Check the devtools.");
       this.#clearHandlers();
     }
   }
 
   #clearHandlers() {
-    this.#resolve = undefined;
-    this.#reject = undefined;
+    this.#onMessage = undefined;
+    this.#onError = undefined;
   }
 
   render(opts: RenderSettings): Promise<ImageData> {
     this.#worker.postMessage(opts);
 
     return new Promise((resolve, reject) => {
-      this.#resolve = resolve;
-      this.#reject = reject;
+      this.#onMessage = resolve;
+      this.#onError = reject;
     });
   }
 }

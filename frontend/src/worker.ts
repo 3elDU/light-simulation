@@ -1,5 +1,9 @@
 import { Config, render } from "./wasm/light_simulation";
 
+postMessage({
+  type: "loaded",
+});
+
 addEventListener("message", async (event) => {
   const config = new Config(
     event.data.width,

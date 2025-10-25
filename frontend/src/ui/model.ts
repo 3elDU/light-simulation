@@ -1,19 +1,21 @@
+export type RenderState =
+  /** Initial empty state */
+  | { state: "loading" }
+  /** Renderer code has been loaded and we're ready to render */
+  | { state: "ready" }
+  /** Progress is from 0 to 100 */
+  | { state: "rendering"; progress: number }
+  | { state: "finished"; image: ImageData }
+  /** Error during rendering, loading, or in the script */
+  | { state: "error"; error: string };
+
 export interface UIModel {
   showControls: boolean;
   width: number;
   height: number;
   maxBounceCount: number;
   samplesPerPixel: number;
-  error?: string;
-
-  /**
-   * From 0 to 100.
-   *
-   * A value of undefined means rendering has not yet started,
-   * and a value of 100 means we have an image
-   */
-  renderingProgress: number | undefined;
-  image: ImageData | undefined;
+  render: RenderState;
 }
 
 export type UINumberInputKey =
@@ -29,6 +31,5 @@ export const getDefaultModel = () =>
     height: 360,
     maxBounceCount: 4,
     samplesPerPixel: 3,
-    renderingProgress: undefined,
-    image: undefined,
+    render: { state: "loading" },
   } satisfies UIModel);
