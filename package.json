@@ -9,5 +9,9 @@
   "devDependencies": {
     "vite": "^7.1.10",
     "vite-plugin-wasm": "^3.5.0"
+  },
+  "dependencies": {
+    "@panzoom/panzoom": "^4.6.0",
+    "typescript-event-target": "^1.1.1"
   }
 }

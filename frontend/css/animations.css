@@ -1,0 +1,19 @@
+.hidden {
+    animation: 150ms fadeout forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+    .hidden {
+        animation-duration: 0ms;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}

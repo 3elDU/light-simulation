@@ -11,8 +11,8 @@
     -moz-appearance: textfield;
 }
 .input.square {
-    width: 2.375rem;
-    height: 2.375rem;
+    padding: 0.5rem;
+    aspect-ratio: 1/1;
 
     display: flex;
     justify-content: center;
@@ -26,6 +26,7 @@ button.input:active {
     background-blend-mode: color;
 }
 
+/** Row of inputs, placed horizontally */
 .input-row {
     display: flex;
     align-items: end;
@@ -37,6 +38,7 @@ button.input:active {
     align-items: center;
 }
 
+/** Input with a label on top */
 .labelled-input {
     width: 100%;
     display: flex;
@@ -66,4 +68,14 @@ button.input:active {
     background: var(--c-primary);
 
     transition: width 150ms linear;
+}
+
+/** Badge */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }

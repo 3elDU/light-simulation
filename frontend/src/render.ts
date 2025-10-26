@@ -1,3 +1,6 @@
+import { TypedEventTarget } from "typescript-event-target";
+import { RenderStats } from "./ui/model";
+
 export interface RenderSettings {
   width: number;
   height: number;
@@ -5,60 +8,77 @@ export interface RenderSettings {
   samplesPerPixel: number;
 }
 
-interface RenderResponse {
+export type FrameEvent = CustomEvent<{
   image: ImageData;
   sample: number;
+}>;
+
+export type LastFrameEvent = CustomEvent<{
+  image: ImageData;
+  stats: RenderStats;
+}>;
+
+interface RenderEventMap {
+  frame: FrameEvent;
+  lastframe: LastFrameEvent;
+  load: CustomEvent<{}>;
 }
 
 /** Abstracts communication with the worker that runs WebAssembly code */
-export default class RenderController {
+export default class RenderController extends TypedEventTarget<RenderEventMap> {
   #worker?: Worker;
 
-  async load() {
+  constructor() {
+    super();
+  }
+
+  /** [re]load the worker */
+  async reset() {
     try {
+      // terminate an existing worker, if it exists
+      if (this.#worker) {
+        this.#worker.terminate();
+      }
+
       // Initialize WebAssembly worker
       this.#worker = new Worker(new URL("./worker/index.ts", import.meta.url), {
         name: "Wasm Worker",
         type: "module",
       });
 
-      let timeout = setTimeout(() => {
-        throw new Error("Timeout reached while waiting for worker to load");
-      }, 30_000);
-
-      // Wait for the "loaded" event
-      await this.#waitForMessage();
-      clearTimeout(timeout);
+      // Listen for events from worker
+      this.#worker.addEventListener("message", this.#onMessage.bind(this));
     } catch (e) {
       throw e;
     }
   }
 
-  #waitForMessage() {
-    return new Promise<any>((resolve, reject) => {
-      this.#worker.addEventListener(
-        "message",
-        (event) => {
-          resolve(event.data);
-        },
-        { once: true }
+  #onMessage(event: MessageEvent) {
+    if (event.data.type === "loaded") {
+      this.dispatchTypedEvent("load", new CustomEvent("load"));
+    } else if (event.data.type === "frame") {
+      this.dispatchTypedEvent(
+        "frame",
+        new CustomEvent("frame", {
+          detail: event.data,
+        })
       );
-      this.#worker.addEventListener(
-        "error",
-        () => {
-          reject("Error inside worker");
-        },
-        { once: true }
+    } else if (event.data.type === "lastframe") {
+      this.dispatchTypedEvent(
+        "lastframe",
+        new CustomEvent("lastframe", {
+          detail: event.data,
+        })
       );
-    });
+    }
   }
 
-  async *render(opts: RenderSettings): AsyncGenerator<RenderResponse> {
+  async startRender(opts: RenderSettings) {
     this.#worker.postMessage(opts);
+  }
 
-    for (let i = 0; i < opts.samplesPerPixel; i++) {
-      const message = (await this.#waitForMessage()) as RenderResponse;
-      yield message;
-    }
+  /** Starts rendering. Rendered frames are sent in 'frame' events */
+  async render(opts: RenderSettings) {
+    this.#worker.postMessage(opts);
   }
 }

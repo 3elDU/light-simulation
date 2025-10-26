@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "es2022",
+    "moduleResolution": "bundler",
     "lib": ["DOM", "ES2022"],
     "types": ["vite/client"],
     "composite": true,
