@@ -4,11 +4,13 @@
   "scripts": {
     "dev": "vite dev",
     "build": "./gen-wasm-glue.sh && vite build",
-    "preview": "npm run build && vite preview"
+    "preview": "npm run build && vite preview",
+    "deploy": "./gen-wasm-glue.sh && vite build && wrangler deploy"
   },
   "devDependencies": {
     "vite": "^7.1.10",
-    "vite-plugin-wasm": "^3.5.0"
+    "vite-plugin-wasm": "^3.5.0",
+    "wrangler": "^4.45.0"
   },
   "dependencies": {
     "@panzoom/panzoom": "^4.6.0",

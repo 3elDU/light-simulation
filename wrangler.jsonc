@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-first-worker",
+  "compatibility_date": "2025-10-24",
+  "route": {
+    "pattern": "light.petafloppa.cc",
+    "custom_domain": true
+  },
+  "assets": {
+    // The path to the directory containing the `index.html` file to be served at `/`
+    "directory": "./dist"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
