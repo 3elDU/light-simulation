@@ -1,3 +1,10 @@
+export interface RenderSettings {
+  width: number;
+  height: number;
+  maxBounceCount: number;
+  samplesPerPixel: number;
+}
+
 export interface RenderStats {
   samplesPerSecond: number;
   totalRenderTime: number;
@@ -15,27 +22,9 @@ export type RenderState =
   /** Error during rendering, loading, or in the script */
   | { state: "error"; error: string };
 
-export interface UIModel {
-  showControls: boolean;
-  width: number;
-  height: number;
-  maxBounceCount: number;
-  samplesPerPixel: number;
-  render: RenderState;
-}
-
-export type UINumberInputKey =
-  | "width"
-  | "height"
-  | "maxBounceCount"
-  | "samplesPerPixel";
-
-export const getDefaultModel = () =>
-  ({
-    showControls: false,
-    width: 1920 / 3,
-    height: 1080 / 3,
-    maxBounceCount: 128,
-    samplesPerPixel: 10,
-    render: { state: "loading" },
-  } satisfies UIModel);
+export const getDefaultSettings = (): RenderSettings => ({
+  width: 1920 / 3,
+  height: 1080 / 3,
+  maxBounceCount: 128,
+  samplesPerPixel: 10,
+});

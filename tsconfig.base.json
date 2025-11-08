@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": false,
+    "moduleResolution": "bundler"
+  }
+}

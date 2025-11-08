@@ -1,25 +1,33 @@
 import Panzoom, { PanzoomObject } from "@panzoom/panzoom";
-import RenderController, { FrameEvent, LastFrameEvent } from "../render";
-import elements from "./elements";
 import {
-  getDefaultModel,
+  getDefaultSettings,
+  RenderSettings,
   RenderState,
-  UIModel,
-  UINumberInputKey,
-} from "./model";
+} from "../../models/render";
+import elements from "../elements";
+import RenderService from "../services/render";
+import { SceneService } from "../services/scene";
 
-export default class UIController {
-  #model: UIModel;
+type UINumberInputKey =
+  | "width"
+  | "height"
+  | "maxBounceCount"
+  | "samplesPerPixel";
+
+export default class RenderController {
+  #scene: SceneService;
+  #render: RenderService;
+  #settings: RenderSettings;
+
   #ctx: CanvasRenderingContext2D;
-  #render: RenderController;
   #panzoom: PanzoomObject;
-
   #panzoomEventsRegistered = false;
 
-  constructor() {
-    this.#model = getDefaultModel();
+  constructor(sceneService: SceneService) {
+    this.#scene = sceneService;
+    this.#settings = getDefaultSettings();
     this.#ctx = elements.outputCanvas.getContext("2d");
-    this.#render = new RenderController();
+    this.#render = new RenderService();
     this.#panzoom = Panzoom(elements.outputCanvas, {
       minScale: 0.5,
       maxScale: 8,
@@ -28,38 +36,24 @@ export default class UIController {
     });
 
     this.#registerEvents();
-    this.update();
-
-    this.#render.reset();
+    this.#render.load();
   }
 
-  /** Called when renderer worker has finished loading */
-  #onload() {
-    this.#setState({
-      state: "ready",
-    });
-  }
-
-  /** Called when a new frame has arrived from renderer */
-  #onframe(event: FrameEvent) {
-    this.#setState({
-      state: "rendering",
-      progress: (event.detail.sample / this.#model.samplesPerPixel) * 100,
-      image: event.detail.image,
-    });
-    this.#registerPanZoomEvents();
-  }
-
-  /** Called when the last frame has finished rendering */
-  #onlastframe(event: LastFrameEvent) {
-    this.#setState({
-      state: "finished",
-      image: event.detail.image,
-      stats: event.detail.stats,
-    });
+  /** Called when scene is changed */
+  #onupdated() {
+    if (!elements.quickPreviewCheckbox.checked) return;
   }
 
   #registerEvents() {
+    // Subscribe to render state changes
+    this.#render.addEventListener("statechange", (event) => {
+      if (event.detail.state === "rendering") {
+        this.#registerPanZoomEvents();
+      }
+
+      this.update(event.detail);
+    });
+
     const makeInputListener = (key: UINumberInputKey) => {
       return (event: Event) => {
         this.#handleNumberChange(key, (event.target as HTMLInputElement).value);
@@ -79,11 +73,12 @@ export default class UIController {
     }
 
     // Register button event listeners
-    elements.renderButton.addEventListener(
-      "click",
-      this.#handleRender.bind(this)
-    );
-    elements.skipButton.addEventListener("click", this.#handleSkip.bind(this));
+    elements.renderButton.addEventListener("click", () => {
+      this.#render.render(this.#settings, this.#scene.all());
+    });
+    elements.skipButton.addEventListener("click", () => {
+      this.#render.load();
+    });
     elements.downloadButton.addEventListener(
       "click",
       this.#handleSave.bind(this)
@@ -93,10 +88,8 @@ export default class UIController {
       this.#handleFullscreen.bind(this)
     );
 
-    // Register render event listeners
-    this.#render.addEventListener("load", this.#onload.bind(this));
-    this.#render.addEventListener("frame", this.#onframe.bind(this));
-    this.#render.addEventListener("lastframe", this.#onlastframe.bind(this));
+    // Render quick preview when scene is changed
+    this.#scene.addEventListener("updated", this.#onupdated.bind(this));
   }
 
   /** Those events will only be registered once the canvas has appeared on screen */
@@ -125,32 +118,14 @@ export default class UIController {
     const num = Number.parseInt(newValue);
 
     if (!Number.isNaN(num)) {
-      this.#model[key] = num;
+      this.#settings[key] = num;
     }
-  }
-
-  async #handleRender() {
-    this.#render.startRender(this.#model);
-    this.#setState({
-      state: "rendering",
-      progress: 0,
-    });
-  }
-
-  async #handleSkip() {
-    this.#render.reset();
-    this.#setState({
-      state: "loading",
-    });
   }
 
   #handleSave() {
     elements.outputCanvas.toBlob((blob) => {
       if (!blob) {
-        this.#setState({
-          state: "error",
-          error: "Failed to extract image from canvas",
-        });
+        this.showError("Failed to extract image from canvas");
         return;
       }
 
@@ -180,15 +155,8 @@ export default class UIController {
     elements.panzoomBadge.classList.add("hidden");
   }
 
-  #setState(newState: RenderState) {
-    this.#model.render = newState;
-    this.update();
-  }
-
   /** Update UI from model */
-  update() {
-    const state = this.#model.render;
-
+  update(state: RenderState) {
     switch (state.state) {
       case "loading":
         elements.renderButton.disabled = true;
@@ -205,10 +173,13 @@ export default class UIController {
         elements.skipButton.disabled = false;
         elements.mainContainer.dataset.state = "rendering";
 
-        elements.progressBar.ariaValueNow = state.progress.toString();
+        // Convert into a scale from 0 to 100
+        const progress = Math.round(state.progress * 100);
+
+        elements.progressBar.ariaValueNow = progress.toString();
         (
           elements.progressBar.children[0] as HTMLElement
-        ).style.width = `${state.progress}%`;
+        ).style.width = `${progress}%`;
 
         if (state.image) {
           elements.outputCanvas.width = state.image.width;
@@ -231,16 +202,20 @@ export default class UIController {
 
         break;
       case "error":
-        elements.mainContainer.dataset.state = "error";
-        elements.errorText.textContent = `Error: ${state.error}`;
-        break;
+        this.showError(state.error);
     }
 
     // Update inputs from model
-    elements.widthInput.value = this.#model.width.toString();
-    elements.heightInput.value = this.#model.height.toString();
-    elements.maxBounceCountInput.value = this.#model.maxBounceCount.toString();
+    elements.widthInput.value = this.#settings.width.toString();
+    elements.heightInput.value = this.#settings.height.toString();
+    elements.maxBounceCountInput.value =
+      this.#settings.maxBounceCount.toString();
     elements.samplesPerPixelInput.value =
-      this.#model.samplesPerPixel.toString();
+      this.#settings.samplesPerPixel.toString();
+  }
+
+  showError(error: string) {
+    elements.mainContainer.dataset.state = "error";
+    elements.errorText.textContent = `Error: ${error}`;
   }
 }

@@ -1,12 +1,5 @@
-#hide-controls-container {
-    position: absolute;
-    left: 32px;
-    top: 32px;
-}
-
 #controls {
-    width: 280px;
-    padding-top: calc(32px + 16px + 1rem);
+    width: 320px;
 }
 
 #result {
@@ -111,4 +104,14 @@
     #canvas-container {
         height: 50lvh;
     }
+}
+
+#object-list {
+    list-style: none;
+    padding: 0;
+}
+#object-list > .object {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }

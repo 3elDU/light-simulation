@@ -8,3 +8,12 @@
     font-family: inherit;
     font-size: inherit;
 }
+
+/**
+    Do not allow pointer events on svg elements, as svg icons are often nested
+    inside buttons, and that interferes with Event.target property replacing it
+    with icon instead of actual button
+*/
+svg {
+    pointer-events: none;
+}

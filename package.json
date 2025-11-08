@@ -3,9 +3,10 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
+    "typecheck": "tsc -p ./tsconfig.web.json --noEmit && tsc -p ./tsconfig.worker.json --noEmit",
     "build": "./gen-wasm-glue.sh && vite build",
     "preview": "npm run build && vite preview",
-    "deploy": "./gen-wasm-glue.sh && vite build && wrangler deploy"
+    "deploy": "./gen-wasm-glue.sh && npm run typecheck && vite build && wrangler deploy"
   },
   "devDependencies": {
     "vite": "^7.1.10",

@@ -1,35 +1,46 @@
+import { MessageFromWorker, MessageToWorker } from "../models/ipc";
 import { Config, Scene } from "../wasm/light_simulation";
 
-postMessage({
+// Type checked event dispatching
+const emit = (event: MessageFromWorker, transferable: Transferable[] = []) => {
+  console.debug("[worker] - message to main thread", event);
+  postMessage(event, transferable);
+};
+
+emit({
   type: "loaded",
 });
 
-addEventListener("message", async (event) => {
+addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
+  console.debug("[worker] - message from main thread", event.data);
+
+  const cfg = event.data.settings;
+
   const config = new Config(
-    event.data.width,
-    event.data.height,
-    event.data.maxBounceCount,
-    event.data.samplesPerPixel
+    cfg.width,
+    cfg.height,
+    cfg.maxBounceCount,
+    cfg.samplesPerPixel
   );
 
   const scene = new Scene(config);
   const start = performance.now();
   let image: ImageData;
 
-  for (let i = 0; i < event.data.samplesPerPixel; i++) {
+  for (let i = 0; i < cfg.samplesPerPixel; i++) {
     scene.sample();
 
     image = new ImageData(
       new Uint8ClampedArray(scene.get_image()),
-      event.data.width,
-      event.data.height
+      cfg.width,
+      cfg.height
     );
 
-    if (i != event.data.samplesPerPixel - 1) {
-      postMessage(
+    if (i != cfg.samplesPerPixel - 1) {
+      emit(
         {
           type: "frame",
-          sample: i + 1,
+          progress: (i + 1) / cfg.samplesPerPixel,
           image,
         },
         [image.data.buffer]
@@ -38,9 +49,9 @@ addEventListener("message", async (event) => {
   }
 
   const totalRenderTime = (performance.now() - start) / 1000;
-  const samplesPerSecond = event.data.samplesPerPixel / totalRenderTime;
+  const samplesPerSecond = cfg.samplesPerPixel / totalRenderTime;
   const megapixelsPerSecond =
-    (samplesPerSecond * event.data.width * event.data.height) / 1_000_000;
+    (samplesPerSecond * cfg.width * cfg.height) / 1_000_000;
   const stats = {
     // Round numbers to two digits after comma
     totalRenderTime: Math.round(totalRenderTime * 100) / 100,
@@ -48,7 +59,7 @@ addEventListener("message", async (event) => {
     megapixelsPerSecond: Math.round(megapixelsPerSecond * 100) / 100,
   };
 
-  postMessage({
+  emit({
     type: "lastframe",
     image,
     stats,

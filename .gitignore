@@ -11,3 +11,6 @@ frontend/src/wasm/*
 
 # compiled frontend
 dist
+
+# typescript garbage
+*.tsbuildinfo
