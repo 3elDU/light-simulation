@@ -4,7 +4,6 @@ import { Color } from "../../models/color";
  * Converts a color component into css color in format #RRGGBB
  */
 export function hexToCssColor(color: Color): string {
-  console.log(color);
   const r = color.r.toString(16).padStart(2, "0");
   const g = color.g.toString(16).padStart(2, "0");
   const b = color.b.toString(16).padStart(2, "0");

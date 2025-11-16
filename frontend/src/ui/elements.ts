@@ -30,5 +30,6 @@ export default {
   addObjectButton: q<HTMLButtonElement>("add-object-btn"),
   clearObjectsButton: q<HTMLButtonElement>("clear-objects-btn"),
   objectList: q<HTMLUListElement>("object-list"),
+  emptyListLabel: q<HTMLHeadingElement>("empty-list-label"),
   objectTemplate: q<HTMLTemplateElement>("object-template"),
 };

@@ -165,8 +165,6 @@ export default class RenderController {
 
       const url = URL.createObjectURL(blob);
 
-      console.log(blob.size, url);
-
       const a = document.createElement("a");
       a.download = "image.png";
       a.href = url;

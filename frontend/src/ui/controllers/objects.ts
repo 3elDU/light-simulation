@@ -32,6 +32,7 @@ export default class ObjectEditorController {
 
     this.#addListeners();
     this.#load();
+    this.#update();
   }
 
   // Loads previously saved objects
@@ -55,6 +56,7 @@ export default class ObjectEditorController {
     this.#scene.addEventListener("reset", () => {
       elements.objectList.querySelectorAll("li").forEach((li) => li.remove());
       this.#load();
+      this.#update();
     });
 
     // Add new object / clear all object buttons
@@ -103,6 +105,8 @@ export default class ObjectEditorController {
     const idx = this.#scene.add(newEmpty());
 
     createObjectEl(idx);
+
+    this.#update();
   }
 
   #clearObjects() {
@@ -110,6 +114,8 @@ export default class ObjectEditorController {
 
     // clear element children
     elements.objectList.querySelectorAll("li").forEach((li) => li.remove());
+
+    this.#update();
   }
 
   #removeObject(event: Event) {
@@ -117,6 +123,8 @@ export default class ObjectEditorController {
 
     this.#scene.delete(idx);
     elements.objectList.querySelector(`.object[data-idx="${idx}"]`).remove();
+
+    this.#update();
   }
 
   #setNumericProperty<K extends "x" | "y" | "z" | "radius" | "emission">(
@@ -129,6 +137,8 @@ export default class ObjectEditorController {
     obj[property] = Number.parseInt(value) as SceneObject[K];
 
     this.#scene.markUpdated();
+
+    this.#update();
   }
 
   #setColor(event: InputEvent) {
@@ -143,5 +153,14 @@ export default class ObjectEditorController {
 
     obj.color = color;
     this.#scene.markUpdated();
+
+    this.#update();
+  }
+
+  // Update UI elements from model
+  #update() {
+    elements.emptyListLabel.style.display = this.#scene.objects.length
+      ? "none"
+      : "block";
   }
 }
