@@ -74,6 +74,8 @@ button.input:active {
     padding: 0;
 
     box-shadow: 0 0 0.25rem var(--c-shadow);
+
+    outline-offset: 2px;
 }
 .color-input > .input::-webkit-color-swatch,
 .color-input > .input::-moz-color-swatch {

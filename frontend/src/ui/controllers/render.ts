@@ -1,12 +1,9 @@
 import Panzoom, { PanzoomObject } from "@panzoom/panzoom";
-import {
-  getDefaultSettings,
-  RenderSettings,
-  RenderState,
-} from "../../models/render";
+import { RenderState } from "../../models/render";
 import elements from "../elements";
 import RenderService from "../services/render";
 import { SceneService } from "../services/scene";
+import { setValueOnPositionInput } from "../helpers/dom";
 
 type UINumberInputKey =
   | "width"
@@ -17,7 +14,6 @@ type UINumberInputKey =
 export default class RenderController {
   #scene: SceneService;
   #render: RenderService;
-  #settings: RenderSettings;
 
   #ctx: CanvasRenderingContext2D;
   #panzoom: PanzoomObject;
@@ -25,7 +21,6 @@ export default class RenderController {
 
   constructor(sceneService: SceneService) {
     this.#scene = sceneService;
-    this.#settings = getDefaultSettings();
     this.#ctx = elements.outputCanvas.getContext("2d");
     this.#render = new RenderService();
     this.#panzoom = Panzoom(elements.outputCanvas, {
@@ -39,9 +34,19 @@ export default class RenderController {
     this.#render.load();
   }
 
-  /** Called when scene is changed */
-  #onupdated() {
+  #quickPreview() {
     if (!elements.quickPreviewCheckbox.checked) return;
+
+    this.#render.render(
+      {
+        ...this.#scene.settings,
+        maxBounceCount: 16,
+        samplesPerPixel: 1,
+        width: Math.min(this.#scene.settings.width / 4, 160),
+        height: Math.min(this.#scene.settings.height / 4, 90),
+      },
+      this.#scene.objects
+    );
   }
 
   #registerEvents() {
@@ -53,6 +58,20 @@ export default class RenderController {
 
       this.update(event.detail);
     });
+
+    // Register camera position input listeners
+    elements.cameraXInput.addEventListener(
+      "change",
+      this.#handleCameraPositionChange.bind(this)
+    );
+    elements.cameraYInput.addEventListener(
+      "change",
+      this.#handleCameraPositionChange.bind(this)
+    );
+    elements.cameraZInput.addEventListener(
+      "change",
+      this.#handleCameraPositionChange.bind(this)
+    );
 
     const makeInputListener = (key: UINumberInputKey) => {
       return (event: Event) => {
@@ -69,16 +88,17 @@ export default class RenderController {
 
     // Register number input event listeners
     for (const [el, key] of elementKeyPairs) {
-      el.addEventListener("input", makeInputListener(key));
+      el.addEventListener("change", makeInputListener(key));
     }
 
     // Register button event listeners
     elements.renderButton.addEventListener("click", () => {
-      this.#render.render(this.#settings, this.#scene.all());
+      this.#render.render(this.#scene.settings, this.#scene.objects);
     });
     elements.skipButton.addEventListener("click", () => {
       this.#render.load();
     });
+    elements.resetButton.addEventListener("click", () => this.#scene.reset());
     elements.downloadButton.addEventListener(
       "click",
       this.#handleSave.bind(this)
@@ -89,7 +109,7 @@ export default class RenderController {
     );
 
     // Render quick preview when scene is changed
-    this.#scene.addEventListener("updated", this.#onupdated.bind(this));
+    this.#scene.addEventListener("updated", this.#quickPreview.bind(this));
   }
 
   /** Those events will only be registered once the canvas has appeared on screen */
@@ -114,11 +134,25 @@ export default class RenderController {
     this.#panzoomEventsRegistered = true;
   }
 
+  #handleCameraPositionChange() {
+    const x = Number.parseFloat(elements.cameraXInput.value);
+    const y = Number.parseFloat(elements.cameraYInput.value);
+    const z = Number.parseFloat(elements.cameraZInput.value);
+
+    this.#scene.settings = {
+      ...this.#scene.settings,
+      cameraPosition: { x, y, z },
+    };
+  }
+
   #handleNumberChange(key: UINumberInputKey, newValue: string) {
     const num = Number.parseInt(newValue);
 
     if (!Number.isNaN(num)) {
-      this.#settings[key] = num;
+      this.#scene.settings = {
+        ...this.#scene.settings,
+        [key]: num,
+      };
     }
   }
 
@@ -202,16 +236,32 @@ export default class RenderController {
 
         break;
       case "error":
+        elements.renderButton.disabled = false;
+        elements.skipButton.disabled = true;
+
         this.showError(state.error);
+
+        break;
     }
 
     // Update inputs from model
-    elements.widthInput.value = this.#settings.width.toString();
-    elements.heightInput.value = this.#settings.height.toString();
+    setValueOnPositionInput(this.#scene.settings.cameraPosition, [
+      elements.cameraXInput,
+      elements.cameraYInput,
+      elements.cameraZInput,
+    ]);
+    setValueOnPositionInput(this.#scene.settings.lookingAt, [
+      elements.lookXInput,
+      elements.lookYInput,
+      elements.lookZInput,
+    ]);
+
+    elements.widthInput.value = this.#scene.settings.width.toString();
+    elements.heightInput.value = this.#scene.settings.height.toString();
     elements.maxBounceCountInput.value =
-      this.#settings.maxBounceCount.toString();
+      this.#scene.settings.maxBounceCount.toString();
     elements.samplesPerPixelInput.value =
-      this.#settings.samplesPerPixel.toString();
+      this.#scene.settings.samplesPerPixel.toString();
   }
 
   showError(error: string) {

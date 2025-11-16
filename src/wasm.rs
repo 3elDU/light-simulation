@@ -1,9 +1,91 @@
-use nalgebra::{Rotation3, Vector2, Vector3};
+use nalgebra::{Vector2, Vector3};
 use wasm_bindgen::prelude::*;
 
 use crate::raytrace::{
     Camera, Config, Lambertian, Object, Scene as InternalScene, Sphere, TransformBuilder,
 };
+
+/// Facade that abstracts away the object creation
+#[wasm_bindgen]
+struct SceneObject {
+    x: f64,
+    y: f64,
+    z: f64,
+    r: u8,
+    g: u8,
+    b: u8,
+    radius: f64,
+    emission: f64,
+}
+
+#[wasm_bindgen]
+impl SceneObject {
+    #[wasm_bindgen(constructor)]
+    pub fn new(x: f64, y: f64, z: f64, r: u8, g: u8, b: u8, radius: f64, emission: f64) -> Self {
+        Self {
+            x,
+            y,
+            z,
+            r,
+            g,
+            b,
+            radius,
+            emission,
+        }
+    }
+}
+
+impl From<SceneObject> for Object {
+    fn from(obj: SceneObject) -> Self {
+        let color = Vector3::new(
+            obj.r as f64 / 255.,
+            obj.g as f64 / 255.,
+            obj.b as f64 / 255.,
+        );
+        let transform = TransformBuilder::new()
+            .translate(Vector3::new(obj.x, obj.y, obj.z))
+            .scale_uniform(obj.radius)
+            .build();
+
+        return if obj.emission == 0. {
+            Object::new(
+                Box::new(Sphere::new()),
+                color,
+                Box::new(Lambertian::new()),
+                transform,
+            )
+        } else {
+            Object::new_emissive(
+                Box::new(Sphere::new()),
+                color,
+                obj.emission,
+                Box::new(Lambertian::new()),
+                transform,
+            )
+        };
+    }
+}
+
+#[wasm_bindgen]
+struct Position {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+#[wasm_bindgen]
+impl Position {
+    #[wasm_bindgen(constructor)]
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { x, y, z }
+    }
+}
+
+impl From<Position> for Vector3<f64> {
+    fn from(value: Position) -> Self {
+        Vector3::new(value.x, value.y, value.z)
+    }
+}
 
 /// Facade that abstracts the internal scene structure away for JavaScript code
 #[wasm_bindgen]
@@ -36,79 +118,23 @@ impl From<&Scene> for Vec<u8> {
 #[wasm_bindgen]
 impl Scene {
     #[wasm_bindgen(constructor)]
-    pub fn new(config: Config) -> Scene {
+    pub fn new(
+        camera_pos: Position,
+        looking_at: Position,
+        config: Config,
+        objects: Vec<SceneObject>,
+    ) -> Scene {
         let cam = Camera::new(
             Vector2::new(config.width, config.height),
-            Vector3::new(20., 0., -8.),
-            Vector3::new(0., 0., 0.),
+            camera_pos.into(),
+            looking_at.into(),
         );
 
         let mut scene = InternalScene::new(config.clone(), cam.clone());
 
-        // Sun
-        let camera_direction = (cam.lookat_position() - cam.position()).normalize();
-        scene.objects.push(Object::new_emissive(
-            Box::new(Sphere::new()),
-            Vector3::new(1., 1., 1.),
-            0.5,
-            Box::new(Lambertian::new()),
-            TransformBuilder::new()
-                .scale_uniform(500.)
-                .translate(
-                    // Rotate the sun 45 degrees clockwise around Y axis
-                    Rotation3::from_axis_angle(&Vector3::y_axis(), std::f64::consts::PI / 4.)
-                        // Move the sun 1000 units in the opposite direction from what the camera is looking at
-                        .transform_vector(&(-camera_direction * 1000.)),
-                )
-                .build(),
-        ));
-
-        // Main sphere
-        scene.objects.push(Object::new(
-            Box::new(Sphere::new()),
-            Vector3::new(1., 1., 1.),
-            Box::new(Lambertian::new()),
-            TransformBuilder::new()
-                .scale_x(8.)
-                .scale_y(8.)
-                .scale_z(8.)
-                .build(),
-        ));
-
-        // Green emissive sphere
-        scene.objects.push(Object::new_emissive(
-            Box::new(Sphere::new()),
-            Vector3::new(0., 1., 0.),
-            2.,
-            Box::new(Lambertian::new()),
-            TransformBuilder::new()
-                .translate_y(10.)
-                .translate_x(5.)
-                .scale_uniform(2.)
-                .scale_z(2.)
-                .build(),
-        ));
-        // Red emissive sphere
-        scene.objects.push(Object::new_emissive(
-            Box::new(Sphere::new()),
-            Vector3::new(1., 0., 0.),
-            2.,
-            Box::new(Lambertian::new()),
-            TransformBuilder::new()
-                .translate_x(12.)
-                .scale_y(1.5)
-                .build(),
-        ));
-        scene.objects.push(Object::new_emissive(
-            Box::new(Sphere::new()),
-            Vector3::new(1., 1., 0.),
-            2.,
-            Box::new(Lambertian::new()),
-            TransformBuilder::new()
-                .translate_z(1050.)
-                .scale_uniform(800.)
-                .build(),
-        ));
+        for obj in objects {
+            scene.objects.push(obj.into());
+        }
 
         return Scene { config, scene };
     }

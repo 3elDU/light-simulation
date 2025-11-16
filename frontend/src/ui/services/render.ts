@@ -95,6 +95,12 @@ export default class RenderService extends TypedEventTarget<RenderEventMap> {
           image: data.image,
         };
         break;
+      case "error":
+        this.state = {
+          state: "error",
+          error: data.error,
+        };
+        break;
     }
   }
 

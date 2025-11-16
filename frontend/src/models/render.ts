@@ -1,4 +1,8 @@
+import { Position } from "./position";
+
 export interface RenderSettings {
+  cameraPosition: Position;
+  lookingAt: Position;
   width: number;
   height: number;
   maxBounceCount: number;
@@ -23,6 +27,8 @@ export type RenderState =
   | { state: "error"; error: string };
 
 export const getDefaultSettings = (): RenderSettings => ({
+  cameraPosition: { x: 0, y: 10, z: -10 },
+  lookingAt: { x: 0, y: 0, z: 0 },
   width: 1920 / 3,
   height: 1080 / 3,
   maxBounceCount: 128,

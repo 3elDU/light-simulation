@@ -1,11 +1,20 @@
-#controls {
-    width: 320px;
+@media (min-width: 1024px) {
+    #controls {
+        width: 320px;
+        overflow-y: auto;
+    }
 }
 
 #result {
     flex: 1;
     padding: 0;
     gap: 0;
+}
+
+@media (max-width: 1024px) {
+    #result {
+        min-height: 50vh;
+    }
 }
 
 #result .no-image {

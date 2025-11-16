@@ -6,7 +6,8 @@ import { RenderSettings, RenderStats } from "./render";
 export type MessageFromWorker =
   | { type: "loaded" }
   | { type: "frame"; progress: number; image: ImageData }
-  | { type: "lastframe"; image: ImageData; stats: RenderStats };
+  | { type: "lastframe"; image: ImageData; stats: RenderStats }
+  | { type: "error"; error: string };
 
 export type MessageToWorker = {
   type: "renderRequest";

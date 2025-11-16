@@ -29,12 +29,86 @@
   </head>
   <body>
     <aside id="controls" class="surface">
-      <h2 class="section-title">Settings</h2>
+      <h2 class="section-title">Render Settings</h2>
 
-      <label class="checkbox-label">
+      <label
+        class="checkbox-label"
+        title="Render an image with low sample count whenever the scene changes"
+      >
         <input type="checkbox" id="quick-preview" class="input" />
         <span>Quick Preview</span>
       </label>
+
+      <div class="labelled-input">
+        <label for="camera-position" class="label">Camera Position</label>
+        <div id="camera-position" class="input-row">
+          <label class="inline-labelled-input">
+            <span class="label">X</span>
+            <input
+              id="camera-x"
+              class="input"
+              type="number"
+              class="input"
+              value="0"
+            />
+          </label>
+          <label class="inline-labelled-input">
+            <span class="label">Y</span>
+            <input
+              id="camera-y"
+              class="input"
+              type="number"
+              class="input"
+              value="0"
+            />
+          </label>
+          <label class="inline-labelled-input">
+            <span class="label">Z</span>
+            <input
+              id="camera-z"
+              class="input"
+              type="number"
+              class="input"
+              value="0"
+            />
+          </label>
+        </div>
+      </div>
+      <div class="labelled-input">
+        <label for="looking-at" class="label">Looking at</label>
+        <div id="looking-at" class="input-row">
+          <label class="inline-labelled-input">
+            <span class="label">X</span>
+            <input
+              id="lookat-x"
+              class="input"
+              type="number"
+              class="input"
+              value="0"
+            />
+          </label>
+          <label class="inline-labelled-input">
+            <span class="label">Y</span>
+            <input
+              id="lookat-y"
+              class="input"
+              type="number"
+              class="input"
+              value="0"
+            />
+          </label>
+          <label class="inline-labelled-input">
+            <span class="label">Z</span>
+            <input
+              id="lookat-z"
+              class="input"
+              type="number"
+              class="input"
+              value="0"
+            />
+          </label>
+        </div>
+      </div>
 
       <div class="input-row">
         <div class="labelled-input">
@@ -109,6 +183,23 @@
             <path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Z" />
           </svg>
           Skip
+        </button>
+        <button
+          id="reset-btn"
+          class="input square c-container"
+          title="Reset all settings and objects. Also clears previously saved scene"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            aria-hidden="true"
+          >
+            <path
+              d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
+            />
+          </svg>
         </button>
       </div>
 
