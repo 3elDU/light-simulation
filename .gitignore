@@ -1,10 +1,10 @@
-/target
-
-# frontend stuff
 node_modules
 
+# rust artifact directory
+target
+
 # compiled wasm files
-frontend/src/wasm/*
+/packages/app/src/lib/wasm
 
 # cloudflare wrangler cache
 .wrangler
@@ -12,5 +12,4 @@ frontend/src/wasm/*
 # compiled frontend
 dist
 
-# typescript garbage
-*.tsbuildinfo
+.svelte-kit

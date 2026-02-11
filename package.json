@@ -1,20 +1,11 @@
 {
-  "type": "module",
-  "private": true,
+  "name": "light-simulation",
+  "workspaces": [
+    "packages/app",
+    "packages/worker",
+    "packages/types"
+  ],
   "scripts": {
-    "dev": "vite dev",
-    "typecheck": "tsc -p ./tsconfig.web.json --noEmit && tsc -p ./tsconfig.worker.json --noEmit",
-    "build": "./gen-wasm-glue.sh && vite build",
-    "preview": "npm run build && vite preview",
-    "deploy": "./gen-wasm-glue.sh && npm run typecheck && vite build && wrangler deploy"
-  },
-  "devDependencies": {
-    "vite": "^7.1.10",
-    "vite-plugin-wasm": "^3.5.0",
-    "wrangler": "^4.45.0"
-  },
-  "dependencies": {
-    "@panzoom/panzoom": "^4.6.0",
-    "typescript-event-target": "^1.1.1"
+    "gen-wasm-glue": "./gen-wasm-glue.sh"
   }
 }
