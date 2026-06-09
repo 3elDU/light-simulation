@@ -1,2 +1,15 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+  import Aside from "$lib/components/aside/Aside.svelte";
+  import Main from "$lib/components/Main.svelte";
+  import "$lib/css/index.css";
+  import { onMount } from "svelte";
+
+  onMount(() => {
+    const worker = new Worker(
+      new URL("../../../worker/src/index.ts", import.meta.url),
+    );
+  });
+</script>
+
+<Aside></Aside>
+<Main></Main>

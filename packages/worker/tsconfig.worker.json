@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["ESNext", "WebWorker"]
-  },
-  "include": ["./frontend/src/worker/**/*.ts", "./frontend/src/models/*.ts"]
-}

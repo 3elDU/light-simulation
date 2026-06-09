@@ -4,7 +4,7 @@ node_modules
 target
 
 # compiled wasm files
-/packages/app/src/lib/wasm
+/packages/worker/src/wasm
 
 # cloudflare wrangler cache
 .wrangler
@@ -13,3 +13,6 @@ target
 dist
 
 .svelte-kit
+
+# svelte build
+build

@@ -1,5 +1,5 @@
-import { MessageFromWorker, MessageToWorker } from "../models/ipc";
-import { Config, Position, Scene, SceneObject } from "../wasm/light_simulation";
+import { MessageFromWorker, MessageToWorker } from "@types/ipc";
+import { Config, Position, Scene, SceneObject } from "./wasm/light_simulation";
 
 // Type checked event dispatching
 const emit = (event: MessageFromWorker, transferable: Transferable[] = []) => {
@@ -31,8 +31,8 @@ addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
           obj.color.g,
           obj.color.b,
           obj.radius,
-          obj.emission
-        )
+          obj.emission,
+        ),
       );
     }
 
@@ -40,14 +40,14 @@ addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
       cfg.width,
       cfg.height,
       cfg.maxBounceCount,
-      cfg.samplesPerPixel
+      cfg.samplesPerPixel,
     );
 
     const scene = new Scene(
       new Position(camPos.x, camPos.y, camPos.z),
       new Position(lookAt.x, lookAt.y, lookAt.z),
       config,
-      objects
+      objects,
     );
     const start = performance.now();
     let image: ImageData;
@@ -58,7 +58,7 @@ addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
       image = new ImageData(
         new Uint8ClampedArray(scene.get_image()),
         cfg.width,
-        cfg.height
+        cfg.height,
       );
 
       if (i != cfg.samplesPerPixel - 1) {
@@ -68,7 +68,7 @@ addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
             progress: (i + 1) / cfg.samplesPerPixel,
             image,
           },
-          [image.data.buffer]
+          [image.data.buffer],
         );
       }
     }

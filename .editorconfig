@@ -5,5 +5,5 @@ indent_style = space
 [*.css]
 indent_size = 4
 
-[*.ts]
+[*.{ts,svelte}]
 indent_size = 2
