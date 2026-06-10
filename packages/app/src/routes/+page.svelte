@@ -6,8 +6,13 @@
 
   onMount(() => {
     const worker = new Worker(
-      new URL("../../../worker/src/index.ts", import.meta.url),
+      new URL("../../../worker/src/index", import.meta.url),
+      {
+        name: "Wasm Worker",
+        type: "module",
+      },
     );
+    console.log(worker);
   });
 </script>
 

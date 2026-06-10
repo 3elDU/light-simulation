@@ -1,4 +1,4 @@
-import { MessageFromWorker, MessageToWorker } from "@types/ipc";
+import type { MessageFromWorker, MessageToWorker } from "../../types/ipc";
 import { Config, Position, Scene, SceneObject } from "./wasm/light_simulation";
 
 // Type checked event dispatching
