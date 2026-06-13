@@ -1,16 +1,18 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "main": ".svelte-kit/cloudflare/_worker.js",
   "name": "lightsim",
   "compatibility_date": "2025-10-24",
+  "compatibility_flags": ["nodejs_als"],
   "route": {
     "pattern": "light.petafloppa.cc",
-    "custom_domain": true
+    "custom_domain": true,
   },
   "assets": {
-    // The path to the directory containing the `index.html` file to be served at `/`
-    "directory": "./dist"
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare",
   },
   "observability": {
-    "enabled": true
-  }
+    "enabled": true,
+  },
 }

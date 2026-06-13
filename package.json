@@ -7,9 +7,5 @@
   ],
   "scripts": {
     "gen-wasm-glue": "./gen-wasm-glue.sh"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-node": "^5.5.2",
-    "@sveltejs/adapter-static": "^3.0.10"
   }
 }
