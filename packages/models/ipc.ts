@@ -1,12 +1,12 @@
 /** Types between worker and main thread */
 
-import { SceneObject } from "./object";
-import { RenderSettings, RenderStats } from "./render";
+import type { SceneObject } from "./object";
+import type { RenderSettings, RenderStats } from "./render";
 
 export type MessageFromWorker =
   | { type: "loaded" }
-  | { type: "frame"; progress: number; image: ImageData }
-  | { type: "lastframe"; image: ImageData; stats: RenderStats }
+  | { type: "frame"; progress: number; image: ImageBitmap }
+  | { type: "lastframe"; image: ImageBitmap; stats: RenderStats }
   | { type: "error"; error: string };
 
 export type MessageToWorker = {

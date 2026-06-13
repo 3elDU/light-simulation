@@ -3,7 +3,7 @@
   "workspaces": [
     "packages/app",
     "packages/worker",
-    "packages/types"
+    "packages/models"
   ],
   "scripts": {
     "gen-wasm-glue": "./gen-wasm-glue.sh"

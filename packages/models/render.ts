@@ -1,4 +1,4 @@
-import { Position } from "./position";
+import { type Position } from "./position";
 
 export interface RenderSettings {
   cameraPosition: Position;
@@ -21,8 +21,8 @@ export type RenderState =
   /** Renderer code has been loaded and we're ready to render */
   | { state: "ready" }
   /** Progress is from 0 to 100 */
-  | { state: "rendering"; progress: number; image?: ImageData }
-  | { state: "finished"; image: ImageData; stats: RenderStats }
+  | { state: "rendering"; progress: number; image?: ImageBitmap }
+  | { state: "finished"; image: ImageBitmap; stats: RenderStats }
   /** Error during rendering, loading, or in the script */
   | { state: "error"; error: string };
 

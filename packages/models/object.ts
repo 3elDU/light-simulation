@@ -1,4 +1,4 @@
-import { Color, getDefaultColor } from "./color";
+import { type Color, getDefaultColor } from "./color";
 
 export interface SceneObject {
   x: number;
@@ -21,7 +21,7 @@ export const getDefaultScene = (): SceneObject[] => [
   },
 ];
 
-export function newEmpty(): SceneObject {
+export function newEmptyObject(): SceneObject {
   return {
     x: 0,
     y: 0,

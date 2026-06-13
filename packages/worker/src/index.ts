@@ -1,4 +1,4 @@
-import type { MessageFromWorker, MessageToWorker } from "../../types/ipc";
+import type { MessageFromWorker, MessageToWorker } from "@models/ipc";
 import { Config, Position, Scene, SceneObject } from "./wasm/light_simulation";
 
 // Type checked event dispatching
@@ -50,15 +50,16 @@ addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
       objects,
     );
     const start = performance.now();
-    let image: ImageData;
 
     for (let i = 0; i < cfg.samplesPerPixel; i++) {
       scene.sample();
 
-      image = new ImageData(
-        new Uint8ClampedArray(scene.get_image()),
-        cfg.width,
-        cfg.height,
+      const image = await globalThis.createImageBitmap(
+        new ImageData(
+          new Uint8ClampedArray(scene.get_image()),
+          cfg.width,
+          cfg.height,
+        ),
       );
 
       if (i != cfg.samplesPerPixel - 1) {
@@ -66,36 +67,40 @@ addEventListener("message", async (event: MessageEvent<MessageToWorker>) => {
           {
             type: "frame",
             progress: (i + 1) / cfg.samplesPerPixel,
-            image,
+            image: image,
           },
-          [image.data.buffer],
+          [image],
+        );
+      } else {
+        const totalRenderTime = (performance.now() - start) / 1000;
+        const samplesPerSecond = cfg.samplesPerPixel / totalRenderTime;
+        const megapixelsPerSecond =
+          (samplesPerSecond * cfg.width * cfg.height) / 1_000_000;
+        const stats = {
+          // Round numbers to two digits after comma
+          totalRenderTime: Math.round(totalRenderTime * 100) / 100,
+          samplesPerSecond: Math.round(samplesPerSecond * 100) / 100,
+          megapixelsPerSecond: Math.round(megapixelsPerSecond * 100) / 100,
+        };
+
+        emit(
+          {
+            type: "lastframe",
+            image: image,
+            stats,
+          },
+          [image],
         );
       }
     }
 
-    const totalRenderTime = (performance.now() - start) / 1000;
-    const samplesPerSecond = cfg.samplesPerPixel / totalRenderTime;
-    const megapixelsPerSecond =
-      (samplesPerSecond * cfg.width * cfg.height) / 1_000_000;
-    const stats = {
-      // Round numbers to two digits after comma
-      totalRenderTime: Math.round(totalRenderTime * 100) / 100,
-      samplesPerSecond: Math.round(samplesPerSecond * 100) / 100,
-      megapixelsPerSecond: Math.round(megapixelsPerSecond * 100) / 100,
-    };
-
-    emit({
-      type: "lastframe",
-      image,
-      stats,
-    });
-
     scene.free();
   } catch (e) {
     console.error("[worker] error", e);
+
     emit({
       type: "error",
-      error: e.toString(),
+      error: e instanceof Error ? e.message : String(e),
     });
   }
 });

@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "lib": ["ESNext", "WebWorker"]
+    "lib": ["ESNext", "WebWorker"],
+    "paths": {
+      "@models/*": ["../models/*"]
+    }
   },
-  "include": ["./src/**/*.ts", "../types/**/*.ts"]
+  "include": ["./src/**/*.ts", "../models/**/*.ts"]
 }
