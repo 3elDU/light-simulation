@@ -2,7 +2,7 @@
   "name": "app",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev .svelte-kit/cloudflare/_worker.js",
+    "dev": "vite dev",
     "build": "vite build",
     "deploy": "npm run check && npm run build && wrangler deploy",
     "preview": "npm run build && wrangler dev",
