@@ -30,6 +30,8 @@ export function load() {
  * Starts the rendering
  */
 export async function startRender(preview = false) {
+  render.fresh = false;
+
   let settings = $state.snapshot(render.settings);
   let objects = $state.snapshot(render.objects);
 

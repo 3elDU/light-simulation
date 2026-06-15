@@ -1,6 +1,7 @@
 <script lang="ts">
   import favicon from "$lib/assets/favicon.svg";
   import ogImage from "$lib/assets/og-image.jpg";
+  import "$lib/css/index.css";
 
   let { children } = $props();
 </script>

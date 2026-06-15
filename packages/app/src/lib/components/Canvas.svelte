@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { isNarrowScreen } from "$lib/layout";
   import { render } from "$lib/state.svelte";
   import { on } from "svelte/events";
 
@@ -38,6 +39,12 @@
   $effect(() => {
     if (render.state.state === "finished") {
       ctx!.transferFromImageBitmap(render.state.image);
+
+      if (isNarrowScreen.matches) {
+        canvas?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }
     } else if (render.state.state === "rendering" && render.state.image) {
       ctx?.transferFromImageBitmap(render.state.image);
     } else if (render.state.state === "error") {
@@ -97,6 +104,12 @@
 
     contain: strict;
     overflow: clip;
+  }
+
+  @media (max-width: 1024px) {
+    .canvas-container {
+      height: 67vh;
+    }
   }
 
   .error {

@@ -7,11 +7,14 @@ export const render = $state({
   state: { state: "loading" } as RenderState,
   objects: getDefaultScene(),
   quickPreview: false,
+  // Indicates that rendering has never been started
+  fresh: true,
 });
 
 $effect.root(() => {
   $effect(() => {
-    console.log("effect running!");
+    console.log("effect running");
+
     if (render.quickPreview) {
       startRender(true);
     }
